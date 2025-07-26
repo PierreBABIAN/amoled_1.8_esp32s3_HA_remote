@@ -1300,7 +1300,7 @@
             "managed_reqs": [ "esp_lcd_sh8601", "espressif__esp_lcd_touch_ft5x06", "lvgl__lvgl" ],
             "managed_priv_reqs": [ "espressif__esp_io_expander_tca9554" ],
             "file": "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/build/esp-idf/main/libmain.a",
-            "sources": [ "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/example_qspi_with_ram.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/ui.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/images.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/styles.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/screens.c" ],
+            "sources": [ "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/mqtt_handler.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/example_qspi_with_ram.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/ui.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/images.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/styles.c", "C:/Users/pierr/Documents/05_LVGL_WITH_RAM/main/ui/screens.c" ],
             "include_dirs": [ "." ]
         },
         "mbedtls": {

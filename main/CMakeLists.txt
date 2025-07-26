@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "example_qspi_with_ram.c" "ui/ui.c" "ui/images.c" "ui/styles.c" "ui/screens.c"
+    SRCS "mqtt_handler.c" "example_qspi_with_ram.c" "ui/ui.c" "ui/images.c" "ui/styles.c" "ui/screens.c"
     INCLUDE_DIRS ".")
 
 

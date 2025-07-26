@@ -37,6 +37,8 @@
 #include "esp_sntp.h"
 #include <time.h>
 
+#include "mqtt_handler.h"
+
 static const char *TAG = "example";
 static SemaphoreHandle_t lvgl_mux = NULL;
 
@@ -85,19 +87,26 @@ esp_lcd_touch_handle_t tp = NULL;
 #define EXAMPLE_LVGL_TASK_STACK_SIZE (4 * 1024)
 #define EXAMPLE_LVGL_TASK_PRIORITY 2
 
-#define BROKER_URI "mqtt://homeassistant.local"
-#define SUB_TOPIC "homeassistant/sensor/test/temperature"
-#define PUB_TOPIC "esp32s3/out"
+
 
 #define WIFI_SSID   "Livebox-0750"
 #define WIFI_PWD    "gWvbpZGmUgNkbdvsbt"
 
-static esp_mqtt_client_handle_t client = NULL;
 
-#define SIZE_STR_DATA       32
 
-const char time_str[SIZE_STR_DATA];
-const char temp_str[SIZE_STR_DATA];
+
+
+// I2C configuration
+#define I2C_MASTER_SCL_IO    14        // Set the SCL pin
+#define I2C_MASTER_SDA_IO    15        // Set the SDA pin
+#define I2C_MASTER_NUM       I2C_NUM_0 // I2C port number
+#define I2C_MASTER_FREQ_HZ   200000    // I2C frequency
+#define I2C_MASTER_TX_BUF_DISABLE 0    // Disable tx buffer
+#define I2C_MASTER_RX_BUF_DISABLE 0    // Disable rx buffer
+#define I2C_TIMEOUT_MS       1000
+
+#define PCF85063_ADDR        0x51      // PCF85063 I2C address
+
 
 void wifi_init_sta(void) {
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -120,73 +129,6 @@ void wifi_init_sta(void) {
     ESP_ERROR_CHECK(esp_wifi_connect());
 }
 
-static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
-    esp_mqtt_event_handle_t event = event_data;
-
-    switch ((esp_mqtt_event_id_t)event_id) {
-        case MQTT_EVENT_CONNECTED:
-            ESP_LOGI(TAG, "Connected to broker, subscribing...");
-            esp_mqtt_client_subscribe(client, SUB_TOPIC, 0);
-            break;
-
-        case MQTT_EVENT_DATA:
-            if (strncmp(event->topic, "homeassistant/sensor/dht/temperature", event->topic_len))
-            {
-                ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
-                        event->topic_len, event->topic,
-                        event->data_len, event->data);
-                        memset(temp_str, '\0', SIZE_STR_DATA);
-                snprintf(temp_str, event->data_len + 4, "%.*s°C", event->data_len, event->data);
-            }
-            else if (strncmp(event->topic, "homeassistant/sensor/dht/temperature_arr", event->topic_len))
-            {
-                
-            }
-            else if (strncmp(event->topic, "homeassistant/sensor/dht/light_lumi", event->topic_len))
-            {
-                
-            }
-            else if (strncmp(event->topic, "homeassistant/sensor/dht/light_color", event->topic_len))
-            {
-                
-            }
-            else if (strncmp(event->topic, "homeassistant/sensor/dht/light_on", event->topic_len))
-            {
-                
-            }
-            break;
-
-        default:
-            break;
-    }
-}
-
-void mqtt_app_start(void) {
-    esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = BROKER_URI,
-        .credentials.username = "Dumuys",
-        .credentials.authentication.password = "Vert4green",
-    };
-
-    client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
-    esp_mqtt_client_start(client);
-}
-
-void mqtt_publish(void *pvParameter) {
-    esp_mqtt_client_publish(client, PUB_TOPIC, "Hello from ESP32-S3!", 0, 1, 0);
-    ESP_LOGI(TAG, "Published message");
-}
-// I2C configuration
-#define I2C_MASTER_SCL_IO    14        // Set the SCL pin
-#define I2C_MASTER_SDA_IO    15        // Set the SDA pin
-#define I2C_MASTER_NUM       I2C_NUM_0 // I2C port number
-#define I2C_MASTER_FREQ_HZ   200000    // I2C frequency
-#define I2C_MASTER_TX_BUF_DISABLE 0    // Disable tx buffer
-#define I2C_MASTER_RX_BUF_DISABLE 0    // Disable rx buffer
-#define I2C_TIMEOUT_MS       1000
-
-#define PCF85063_ADDR        0x51      // PCF85063 I2C address
 
 // Helper function to initiate I2C
 esp_err_t i2c_master_init(void) {
@@ -720,9 +662,17 @@ void action_prev(lv_event_t *e) {
     loadScreen(--current_sreen_app);
 }
 
+void action_light_on(lv_event_t *e) {
+    mqtt_publish_int(TOPIC_LON, 1);
+}
+void action_light_off(lv_event_t *e) {
+    mqtt_publish_int(TOPIC_LON, 0);
+}
+
 const char *get_var_clock()
 {
     struct time_struct t;
+    struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
     t.minutes = 0;
     t.hours = 0;
     t.seconds = 0;
@@ -731,16 +681,48 @@ const char *get_var_clock()
     err = rtc_get_time(&t);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to get time");
-        sprintf(time_str, "failed");
+        sprintf(mqtt_ctx->time_str, "failed");
     } else {
-        sprintf(time_str, "%2d:%2d:%2d", (int)t.hours, (int)t.minutes, (int)t.seconds);
+        sprintf(mqtt_ctx->time_str, "%2d:%2d:%2d", (int)t.hours, (int)t.minutes, (int)t.seconds);
     }
-    return time_str;
+    return mqtt_ctx->time_str;
 }
 
 const char *get_var_temp()
 {
-    return temp_str;
+    struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
+    return mqtt_ctx->temp_str;
+}
+
+uint32_t *get_var_light_lumi()
+{
+    struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
+    return (uint32_t *)mqtt_ctx->light_lumi_cmd;
+}
+
+uint32_t *get_var_light_color()
+{
+    struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
+    return (uint32_t *)mqtt_ctx->light_color;
+}
+
+uint32_t *get_var_light_on()
+{
+    struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
+    return (uint32_t *)mqtt_ctx->light_on;
+}
+
+void set_var_light_lumi(uint32_t val)
+{
+    mqtt_publish_int(TOPIC_LIGHT, val);
+}
+void set_var_light_color(uint32_t val)
+{
+    mqtt_publish_int(TOPIC_COLOR, val);
+}
+void set_var_light_on(uint32_t val)
+{
+    mqtt_publish_int(TOPIC_LON, val);
 }
 
 int loop(void)
@@ -748,10 +730,18 @@ int loop(void)
     int ret = 0;
     while (!ret) {
 
-        
+        struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
+        if (mqtt_ctx->update_req == 1)
+        {
+            tick_screen_light();
+            tick_screen_light_1();
+            tick_screen_main();
+        }
         ui_tick();
+        vTaskDelay(1);
         // Delay for 1/10 second
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        
+        //vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     return ret;
 }

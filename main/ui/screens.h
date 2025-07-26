@@ -11,20 +11,20 @@ typedef struct _objects_t {
     lv_obj_t *main;
     lv_obj_t *light;
     lv_obj_t *light_1;
+    lv_obj_t *light_sw;
+    lv_obj_t *hue;
     lv_obj_t *clock_label;
     lv_obj_t *prev;
     lv_obj_t *next;
     lv_obj_t *temp_label;
-    lv_obj_t *obj0;
+    lv_obj_t *slid_lumi;
     lv_obj_t *prev_1;
     lv_obj_t *next_1;
-    lv_obj_t *hue;
-    lv_obj_t *slid_lumi;
-    lv_obj_t *prev_2;
-    lv_obj_t *next_2;
     lv_obj_t *temp;
     lv_obj_t *co2;
     lv_obj_t *lumi;
+    lv_obj_t *prev_2;
+    lv_obj_t *next_2;
 } objects_t;
 
 extern objects_t objects;
