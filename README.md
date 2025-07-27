@@ -28,7 +28,25 @@ In this example you can enable touch controller SPD2010 or CST816 connected via 
 
 ### Hardware Connection
 
+<<<<<<< HEAD
 The connection between ESP Board and the LCD is as follows:
+=======
+# MQTT
+
+#define BROKER_URI "mqtt://homeassistant.local"
+
+Topics that the device is listening :
+#define SUB_TOPIC_TEMP "homeassistant/sensor/test/temperature"
+#define SUB_TOPIC_LUMI "homeassistant/sensor/test/lumi"
+#define SUB_TOPIC_LUMI_CMD "homeassistant/sensor/test/lumi_cmd"
+#define SUB_TOPIC_COLOR "homeassistant/sensor/test/color"
+#define SUB_TOPIC_LON "homeassistant/sensor/test/lon"
+
+topics that the device is righting on :
+#define TOPIC_LON_STR       "test/lon"
+#define TOPIC_COLOR_STR       "test/color"
+#define TOPIC_LIGHT_STR       "test/light"
+>>>>>>> a53a5f3a27ff1c80fd63d716a5dae23dde41478a
 
 ```
        ESP Board                SPD1020, GC9B71 or SH8601 Panel (QSPI)
