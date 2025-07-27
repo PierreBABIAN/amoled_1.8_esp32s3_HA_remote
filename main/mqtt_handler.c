@@ -30,6 +30,10 @@ void mqtt_publish_int(int topic, uint32_t val) {
             mqtt_ctx.light_on = (int)val;
             esp_mqtt_client_publish(client, TOPIC_LON_STR, buffer, 0, 1, 0);
             break;
+        case TOPIC_AUTO_BRIGHT:
+            mqtt_ctx.light_auto_bright = (int)val;
+            esp_mqtt_client_publish(client, TOPIC_AUTO_BRIGHT_STR, buffer, 0, 1, 0);
+            break;
 
     }
     ESP_LOGI(TAG, "Published message");
@@ -112,6 +116,17 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
                         memset(light_on_buf, '\0', SIZE_STR_DATA);
                 snprintf(light_on_buf, event->data_len + 4, "%.*s°C", event->data_len, event->data);
                 mqtt_ctx.light_on = atoi(light_on_buf);
+                mqtt_ctx.update_req = 1;
+            }
+            else if (!strncmp(event->topic, SUB_TOPIC_AUTO_BRIGHT, event->topic_len))
+            {
+                const char light_auto_bright_buf[SIZE_STR_DATA];
+                ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
+                        event->topic_len, event->topic,
+                        event->data_len, event->data);
+                        memset(light_auto_bright_buf, '\0', SIZE_STR_DATA);
+                snprintf(light_auto_bright_buf, event->data_len + 4, "%.*s°C", event->data_len, event->data);
+                mqtt_ctx.light_auto_bright = atoi(light_auto_bright_buf);
                 mqtt_ctx.update_req = 1;
             }
             break;

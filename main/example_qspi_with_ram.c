@@ -89,8 +89,8 @@ esp_lcd_touch_handle_t tp = NULL;
 
 
 
-#define WIFI_SSID   "Livebox-0750"
-#define WIFI_PWD    "gWvbpZGmUgNkbdvsbt"
+#define WIFI_SSID   "SSID"
+#define WIFI_PWD    "MDP"
 
 
 
@@ -669,6 +669,13 @@ void action_light_off(lv_event_t *e) {
     mqtt_publish_int(TOPIC_LON, 0);
 }
 
+void action_auto_bright_checked_on(lv_event_t *e) {
+    mqtt_publish_int(TOPIC_AUTO_BRIGHT, 1);
+}
+void action_auto_bright_checked_off(lv_event_t *e) {
+    mqtt_publish_int(TOPIC_AUTO_BRIGHT, 0);
+}
+
 const char *get_var_clock()
 {
     struct time_struct t;
@@ -683,7 +690,7 @@ const char *get_var_clock()
         ESP_LOGE(TAG, "Failed to get time");
         sprintf(mqtt_ctx->time_str, "failed");
     } else {
-        sprintf(mqtt_ctx->time_str, "%2d:%2d:%2d", (int)t.hours, (int)t.minutes, (int)t.seconds);
+        sprintf(mqtt_ctx->time_str, "%02d:%02d:%02d", (int)t.hours, (int)t.minutes, (int)t.seconds);
     }
     return mqtt_ctx->time_str;
 }
@@ -712,6 +719,12 @@ uint32_t *get_var_light_on()
     return (uint32_t *)mqtt_ctx->light_on;
 }
 
+uint32_t *get_var_auto_bright_on()
+{
+    struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
+    return (uint32_t *)mqtt_ctx->light_auto_bright;
+}
+
 void set_var_light_lumi(uint32_t val)
 {
     mqtt_publish_int(TOPIC_LIGHT, val);
@@ -723,6 +736,10 @@ void set_var_light_color(uint32_t val)
 void set_var_light_on(uint32_t val)
 {
     mqtt_publish_int(TOPIC_LON, val);
+}
+void set_var_auto_bright_on(uint32_t val)
+{
+    mqtt_publish_int(TOPIC_AUTO_BRIGHT, val);
 }
 
 int loop(void)

@@ -19,7 +19,8 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_TEMP = 1,
     FLOW_GLOBAL_VARIABLE_LIGHT_LUMI = 2,
     FLOW_GLOBAL_VARIABLE_LIGHT_ON = 3,
-    FLOW_GLOBAL_VARIABLE_LIGHT_COLOR = 4
+    FLOW_GLOBAL_VARIABLE_LIGHT_COLOR = 4,
+    FLOW_GLOBAL_VARIABLE_AUTO_BRIGHT_ON = 5
 };
 
 // Native global variables
@@ -34,6 +35,8 @@ extern int32_t get_var_light_on();
 extern void set_var_light_on(int32_t value);
 extern int32_t get_var_light_color();
 extern void set_var_light_color(int32_t value);
+extern int32_t get_var_auto_bright_on();
+extern void set_var_auto_bright_on(int32_t value);
 
 
 #ifdef __cplusplus
