@@ -11,14 +11,15 @@
 #define SUB_TOPIC_COLOR "homeassistant/sensor/test/color"
 #define SUB_TOPIC_LON "homeassistant/sensor/test/lon"
 #define SUB_TOPIC_AUTO_BRIGHT "homeassistant/sensor/test/auto_bright_on"
+#define SUB_TOPIC_TEMP_ARR "homeassistant/sensor/test/histo"
 
 #define TOPIC_LON_STR       "test/lon"
 #define TOPIC_COLOR_STR       "test/color"
 #define TOPIC_LIGHT_STR       "test/light"
- #define TOPIC_AUTO_BRIGHT_STR  "test/auto_bright_on"
+#define TOPIC_AUTO_BRIGHT_STR  "test/auto_bright_on"
 
 #define SIZE_STR_DATA       32
-#define VAL_HISTO_SIZE      32
+#define VAL_HISTO_SIZE      48
 
 enum topics_used {
     TOPIC_LIGHT,

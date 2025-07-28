@@ -2,6 +2,7 @@
 #include "mqtt_client.h"
 #include "mqtt_handler.h"
 #include "esp_log.h"
+#include "cJSON.h"
 
 #define TAG     "MQTT"
 
@@ -12,6 +13,47 @@ static esp_mqtt_client_handle_t client = NULL;
 struct mqtt_context *get_mqtt_ctx(void)
 {
     return &mqtt_ctx;
+}
+
+void mqtt_data_handler(const char *mqtt_payload)
+{
+    // Parse le JSON
+    cJSON *root = cJSON_Parse(mqtt_payload);
+    if (!root) {
+        printf("Erreur de parsing JSON\n");
+        return;
+    }
+
+    // Accède à "statistics"
+    cJSON *statistics = cJSON_GetObjectItem(root, "statistics");
+    if (!statistics) {
+        printf("Champ 'statistics' manquant\n");
+        cJSON_Delete(root);
+        return;
+    }
+
+    // Accède à "sensor.temp"
+    cJSON *sensor_array = cJSON_GetObjectItem(statistics, "sensor.temp");
+    if (!sensor_array || !cJSON_IsArray(sensor_array)) {
+        printf("Champ 'sensor.temp' manquant ou pas un array\n");
+        cJSON_Delete(root);
+        return;
+    }
+
+    // Parcourt le tableau
+    int count = cJSON_GetArraySize(sensor_array);
+    for (int i = 0; (i < count) && (i < SIZE_STR_DATA); i++) {
+        cJSON *entry = cJSON_GetArrayItem(sensor_array, i);
+        if (entry) {
+            cJSON *mean_item = cJSON_GetObjectItem(entry, "mean");
+            if (mean_item && cJSON_IsNumber(mean_item)) {
+                mqtt_ctx.temp_arr[i] = mean_item->valuedouble;
+                // TODO : stocker ou traiter ici
+            }
+        }
+    }
+
+    cJSON_Delete(root); // Libère la mémoire
 }
 
 void mqtt_publish_int(int topic, uint32_t val) {
@@ -50,6 +92,8 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             esp_mqtt_client_subscribe(client, SUB_TOPIC_LUMI_CMD, 0);
             esp_mqtt_client_subscribe(client, SUB_TOPIC_COLOR, 0);
             esp_mqtt_client_subscribe(client, SUB_TOPIC_LON, 0);
+            esp_mqtt_client_subscribe(client, SUB_TOPIC_AUTO_BRIGHT, 0);
+            esp_mqtt_client_subscribe(client, SUB_TOPIC_TEMP_ARR, 0);
             break;
 
         case MQTT_EVENT_DATA:
@@ -128,6 +172,16 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
                 snprintf(light_auto_bright_buf, event->data_len + 4, "%.*s°C", event->data_len, event->data);
                 mqtt_ctx.light_auto_bright = atoi(light_auto_bright_buf);
                 mqtt_ctx.update_req = 1;
+            }
+            else if (!strncmp(event->topic, SUB_TOPIC_TEMP_ARR, event->topic_len))
+            {
+                char payload[event->data_len + 1];
+                memcpy(payload, event->data, event->data_len);
+                payload[event->data_len] = '\0';
+                mqtt_data_handler(payload);
+                ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
+                        event->topic_len, event->topic,
+                        event->data_len, event->data);
             }
             break;
 

@@ -89,8 +89,8 @@ esp_lcd_touch_handle_t tp = NULL;
 
 
 
-#define WIFI_SSID   "SSID"
-#define WIFI_PWD    "MDP"
+#define WIFI_SSID   "Livebox-0750"
+#define WIFI_PWD    "gWvbpZGmUgNkbdvsbt"
 
 
 
@@ -107,6 +107,8 @@ esp_lcd_touch_handle_t tp = NULL;
 
 #define PCF85063_ADDR        0x51      // PCF85063 I2C address
 
+
+lv_chart_series_t *ser;
 
 void wifi_init_sta(void) {
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -648,7 +650,9 @@ void app_main(void)
         // Release the mutex
         example_lvgl_unlock();
     }
-    
+
+    ser = lv_chart_add_series(objects.temp, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_range(objects.temp, LV_CHART_AXIS_PRIMARY_Y, 10, 40);
     ret = loop();
 }
 
@@ -750,6 +754,15 @@ int loop(void)
         struct mqtt_context *mqtt_ctx = get_mqtt_ctx();
         if (mqtt_ctx->update_req == 1)
         {
+            lv_coord_t my_values_int[VAL_HISTO_SIZE];
+
+            for(int i = 0; i < VAL_HISTO_SIZE; i++) {
+                my_values_int[i] = (lv_coord_t)(int)mqtt_ctx->temp_arr[i];  // Exemple : multiplier pour garder une précision
+            }
+            lv_chart_set_point_count(objects.temp, VAL_HISTO_SIZE);
+            lv_chart_set_ext_y_array(objects.temp, ser, my_values_int);
+
+            lv_chart_refresh(objects.temp);
             tick_screen_light();
             tick_screen_light_1();
             tick_screen_main();
