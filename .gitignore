@@ -57,7 +57,7 @@ components/**/build/
 components/**/build_*_*/
 components/**/sdkconfig
 components/**/sdkconfig.old
-components/**/test_apps/wifi_nvs_config/nvs_data_suffix.csv
+#components/**/test_apps/
 
 # Example project files
 examples/**/build/
