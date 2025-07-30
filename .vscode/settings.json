@@ -12,5 +12,6 @@
     "--background-index",
     "--query-driver=C:\\Espressif\\tools\\xtensa-esp-elf\\esp-14.2.0_20241119\\xtensa-esp-elf\\bin\\xtensa-esp32s3-elf-gcc.exe",
     "--compile-commands-dir=c:\\Users\\pierr\\Documents\\05_LVGL_WITH_RAM\\build"
-  ]
+  ],
+  "idf.pythonInstallPath": "/usr/bin/python"
 }
