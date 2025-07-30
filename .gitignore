@@ -2,3 +2,4 @@
 */CMakeFiles
 managed_components/*
 build/*
+dependencies.lock
