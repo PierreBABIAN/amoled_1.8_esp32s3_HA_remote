@@ -29,9 +29,9 @@ enum topics_used {
 };
 
 struct mqtt_context {
-    const char time_str[SIZE_STR_DATA];
-    const char temp_str[SIZE_STR_DATA];
-    const char lumi_str[SIZE_STR_DATA];
+    char time_str[SIZE_STR_DATA];
+    char temp_str[SIZE_STR_DATA];
+    char lumi_str[SIZE_STR_DATA];
     int light_lumi_arr[VAL_HISTO_SIZE];
     float temp_arr[VAL_HISTO_SIZE];
     int light_lumi_cmd;

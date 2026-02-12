@@ -131,7 +131,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             }
             else if (!strncmp(event->topic, SUB_TOPIC_LUMI_CMD, event->topic_len))
             {
-                const char light_lumi_buf[SIZE_STR_DATA];
+                char light_lumi_buf[SIZE_STR_DATA];
                 ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
                         event->topic_len, event->topic,
                         event->data_len, event->data);
@@ -142,7 +142,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             }
             else if (!strncmp(event->topic, SUB_TOPIC_COLOR, event->topic_len))
             {
-                const char light_color_buf[SIZE_STR_DATA];
+                char light_color_buf[SIZE_STR_DATA];
                 ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
                         event->topic_len, event->topic,
                         event->data_len, event->data);
@@ -153,7 +153,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             }
             else if (!strncmp(event->topic, SUB_TOPIC_LON, event->topic_len))
             {
-                const char light_on_buf[SIZE_STR_DATA];
+                char light_on_buf[SIZE_STR_DATA];
                 ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
                         event->topic_len, event->topic,
                         event->data_len, event->data);
@@ -164,7 +164,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             }
             else if (!strncmp(event->topic, SUB_TOPIC_AUTO_BRIGHT, event->topic_len))
             {
-                const char light_auto_bright_buf[SIZE_STR_DATA];
+                char light_auto_bright_buf[SIZE_STR_DATA];
                 ESP_LOGI(TAG, "Received on topic %.*s: %.*s",
                         event->topic_len, event->topic,
                         event->data_len, event->data);
